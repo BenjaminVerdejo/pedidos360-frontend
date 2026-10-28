@@ -1,0 +1,121 @@
+<h2>Administración de RabbitMQ</h2>
+<p class="roles">
+  Crea y elimina colas, exchanges y bindings a través de <strong>rabbit-admin-service</strong>.
+  Las colas y exchanges del sistema (pedidos.exchange, notificaciones.queue, tickets.queue y sus DLQ) están protegidos.
+</p>
+
+@if (registros().length) {
+  <div class="card registro">
+    <h3>Resultado</h3>
+    <ul>
+      @for (r of registros(); track $index) {
+        <li [class]="r.ok ? 'ok-txt' : 'error-txt'"><span class="hora">{{ r.hora }}</span> {{ r.ok ? '✔' : '✖' }} {{ r.texto }}</li>
+      }
+    </ul>
+  </div>
+}
+
+<div class="grid">
+  <!-- ================= COLAS ================= -->
+  <div class="card">
+    <h3>Nueva cola</h3>
+    <form [formGroup]="colaForm" (ngSubmit)="crearCola()" class="form-col">
+      <label>Nombre *
+        <input formControlName="nombre" placeholder="facturas.queue" />
+        <small class="campo-error">{{ error(colaForm.get('nombre')) }}</small>
+      </label>
+      <label>TTL de mensajes (ms)
+        <input type="number" formControlName="ttlMs" placeholder="60000 (opcional)" />
+        <small class="campo-error">{{ error(colaForm.get('ttlMs')) }}</small>
+      </label>
+      <label>Máximo de mensajes
+        <input type="number" formControlName="maxLength" placeholder="1000 (opcional)" />
+        <small class="campo-error">{{ error(colaForm.get('maxLength')) }}</small>
+      </label>
+      <label>Dead letter exchange (DLQ)
+        <input formControlName="deadLetterExchange" placeholder="pedidos.dlx (opcional)" />
+        <small class="campo-error">{{ error(colaForm.get('deadLetterExchange')) }}</small>
+      </label>
+      <label>Dead letter routing key
+        <input formControlName="deadLetterRoutingKey" placeholder="facturas.dlq (opcional)" />
+        <small class="campo-error">{{ error(colaForm.get('deadLetterRoutingKey')) }}</small>
+      </label>
+      <label class="check"><input type="checkbox" formControlName="durable" /> Durable</label>
+      <button type="submit" [disabled]="cargando()">Crear cola</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <h3>Consultar / eliminar cola</h3>
+    <form [formGroup]="gestionColaForm" class="form-col">
+      <label>Nombre *
+        <input formControlName="nombre" placeholder="facturas.queue" />
+        <small class="campo-error">{{ error(gestionColaForm.get('nombre')) }}</small>
+      </label>
+      <label class="check"><input type="checkbox" formControlName="soloSiVacia" /> Eliminar solo si está vacía</label>
+      <div class="botones">
+        <button type="button" class="secundario" (click)="consultarCola()" [disabled]="cargando()">Consultar</button>
+        <button type="button" class="peligro" (click)="eliminarCola()" [disabled]="cargando()">Eliminar</button>
+      </div>
+    </form>
+    @if (colaConsultada(); as c) {
+      <div class="ok">
+        <strong>{{ c.nombre }}</strong>: {{ c.mensajes }} mensajes · {{ c.consumidores }} consumidores
+      </div>
+    }
+  </div>
+
+  <!-- ================= EXCHANGES ================= -->
+  <div class="card">
+    <h3>Nuevo exchange</h3>
+    <form [formGroup]="exchangeForm" (ngSubmit)="crearExchange()" class="form-col">
+      <label>Nombre *
+        <input formControlName="nombre" placeholder="facturas.exchange" />
+        <small class="campo-error">{{ error(exchangeForm.get('nombre')) }}</small>
+      </label>
+      <label>Tipo *
+        <select formControlName="tipo">
+          @for (t of tipos; track t) {
+            <option [value]="t">{{ t }}</option>
+          }
+        </select>
+      </label>
+      <label class="check"><input type="checkbox" formControlName="durable" /> Durable</label>
+      <button type="submit" [disabled]="cargando()">Crear exchange</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <h3>Eliminar exchange</h3>
+    <form [formGroup]="eliminarExchangeForm" (ngSubmit)="eliminarExchange()" class="form-col">
+      <label>Nombre *
+        <input formControlName="nombre" placeholder="facturas.exchange" />
+        <small class="campo-error">{{ error(eliminarExchangeForm.get('nombre')) }}</small>
+      </label>
+      <button type="submit" class="peligro" [disabled]="cargando()">Eliminar exchange</button>
+    </form>
+  </div>
+
+  <!-- ================= BINDINGS ================= -->
+  <div class="card ancho">
+    <h3>Binding exchange → cola</h3>
+    <form [formGroup]="bindingForm" class="form-grid">
+      <label>Exchange *
+        <input formControlName="exchange" placeholder="facturas.exchange" />
+        <small class="campo-error">{{ error(bindingForm.get('exchange')) }}</small>
+      </label>
+      <label>Cola *
+        <input formControlName="cola" placeholder="facturas.queue" />
+        <small class="campo-error">{{ error(bindingForm.get('cola')) }}</small>
+      </label>
+      <label>Routing key
+        <input formControlName="routingKey" placeholder="factura.# (vacío para FANOUT)" />
+        <small class="campo-error">{{ error(bindingForm.get('routingKey')) }}</small>
+      </label>
+      <div class="botones">
+        <button type="button" (click)="crearBinding()" [disabled]="cargando()">Crear</button>
+        <button type="button" class="peligro" (click)="eliminarBinding()" [disabled]="cargando()">Eliminar</button>
+      </div>
+    </form>
+  </div>
+</div>

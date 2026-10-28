@@ -1,0 +1,14 @@
+<div class="card">
+  <h2>Bienvenido a Pedidos360</h2>
+
+  @if (!logueado) {
+    <p>Para usar el sistema tienes que iniciar sesión con tu cuenta de Azure AD (botón arriba a la derecha).</p>
+  } @else {
+    <p>Sesión iniciada correctamente. Ya puedes ir a <strong>Pedidos</strong> o probar la conexión segura con el backend.</p>
+    <button (click)="probarBackend()">Probar conexión con el backend</button>
+
+    @if (respuesta()) {
+      <div [class]="respuesta().startsWith('Error') ? 'error' : 'ok'" style="margin-top: 14px">{{ respuesta() }}</div>
+    }
+  }
+</div>

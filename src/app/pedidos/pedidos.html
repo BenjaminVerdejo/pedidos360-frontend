@@ -1,0 +1,57 @@
+<h2>Pedidos</h2>
+<p class="roles">
+  Roles: {{ roles().length ? roles().join(', ') : 'sin roles asignados' }}
+  · Scopes: {{ scopes().length ? scopes().join(', ') : '-' }}
+</p>
+
+@if (error()) {
+  <div class="error">{{ error() }}</div>
+}
+@if (aviso()) {
+  <div class="ok" style="margin: 0 0 16px">{{ aviso() }}</div>
+}
+
+<div class="card">
+  <h3>Nuevo pedido</h3>
+  <div class="form-grid">
+    <input #nombre placeholder="Nombre cliente" />
+    <input #email placeholder="Email" />
+    <input #desc placeholder="Descripción" />
+    <input #total type="number" placeholder="Total" />
+    <button (click)="crear(nombre.value, email.value, desc.value, total.value)">Crear pedido</button>
+  </div>
+</div>
+
+<div class="card">
+  <h3>Listado</h3>
+  <div class="tabla-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th><th>Cliente</th><th>Descripción</th><th>Total</th><th>Estado</th><th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (p of pedidos(); track p.id) {
+          <tr>
+            <td>#{{ p.id }}</td>
+            <td>{{ p.cliente.nombre }}</td>
+            <td>{{ p.descripcion }}</td>
+            <td>${{ p.total }}</td>
+            <td><span [class]="'badge ' + (p.estado ?? '').toLowerCase()">{{ p.estado }}</span></td>
+            <td class="acciones">
+              <button class="secundario" (click)="cambiarEstado(p, 'ENVIADO')">Enviado</button>
+              <button class="secundario" (click)="cambiarEstado(p, 'ENTREGADO')">Entregado</button>
+              @if (esAdmin) {
+                <button class="peligro" (click)="eliminar(p)">Eliminar</button>
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+    @if (pedidos().length === 0) {
+      <div class="vacio">Aún no hay pedidos, crea el primero arriba.</div>
+    }
+  </div>
+</div>

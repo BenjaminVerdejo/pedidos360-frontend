@@ -1,0 +1,29 @@
+<header class="barra">
+  <h1 class="logo">Pedidos<span>360</span></h1>
+
+  <nav>
+    <a routerLink="/" routerLinkActive="activo" [routerLinkActiveOptions]="{ exact: true }">Inicio</a>
+    @if (loginDisplay()) {
+      <a routerLink="/pedidos" routerLinkActive="activo">Pedidos</a>
+    }
+    @if (admin()) {
+      <a routerLink="/admin-rabbitmq" routerLinkActive="activo">RabbitMQ</a>
+    }
+  </nav>
+
+  <div class="sesion">
+    @if (!loginDisplay()) {
+      <button (click)="login()">Iniciar sesión</button>
+    } @else {
+      <div class="usuario">
+        <div class="avatar">{{ usuario().charAt(0).toUpperCase() }}</div>
+        <span>{{ usuario() }}</span>
+      </div>
+      <button (click)="logout()">Cerrar sesión</button>
+    }
+  </div>
+</header>
+
+<main>
+  <router-outlet />
+</main>

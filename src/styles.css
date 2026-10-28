@@ -1,0 +1,120 @@
+/* You can add global styles to this file, and also import other style files */
+:root {
+  --azul: #1e3a8a;
+  --azul-claro: #3b82f6;
+  --fondo: #f1f5f9;
+  --texto: #1e293b;
+  --gris: #64748b;
+  --borde: #e2e8f0;
+  --verde: #16a34a;
+  --rojo: #dc2626;
+  --amarillo: #d97706;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+  background: var(--fondo);
+  color: var(--texto);
+}
+
+h2 { margin: 0 0 16px; }
+h3 { margin: 0 0 12px; }
+
+/* tarjetas */
+.card {
+  background: white;
+  border: 1px solid var(--borde);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+/* botones */
+button {
+  background: var(--azul-claro);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+button:hover { background: var(--azul); }
+button.secundario { background: white; color: var(--azul); border: 1px solid var(--azul-claro); }
+button.secundario:hover { background: #eff6ff; }
+button.peligro { background: var(--rojo); }
+button.peligro:hover { background: #991b1b; }
+
+/* inputs */
+input {
+  padding: 9px 12px;
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+  font-size: 14px;
+  width: 100%;
+}
+input:focus { outline: 2px solid var(--azul-claro); border-color: transparent; }
+
+/* formulario en grilla */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  align-items: end;
+}
+
+/* tabla */
+.tabla-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+th {
+  text-align: left;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--gris);
+  padding: 10px 12px;
+  border-bottom: 2px solid var(--borde);
+}
+td { padding: 12px; border-bottom: 1px solid var(--borde); font-size: 14px; }
+tr:hover td { background: #f8fafc; }
+td.acciones { display: flex; gap: 6px; flex-wrap: wrap; }
+td.acciones button { padding: 5px 10px; font-size: 13px; }
+
+/* etiquetas de estado */
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  background: #e2e8f0;
+  color: var(--gris);
+}
+.badge.pendiente { background: #fef3c7; color: var(--amarillo); }
+.badge.enviado { background: #dbeafe; color: var(--azul); }
+.badge.entregado { background: #dcfce7; color: var(--verde); }
+
+/* mensajes */
+.error {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+}
+.ok {
+  background: #dcfce7;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-top: 14px;
+}
+.vacio { text-align: center; color: var(--gris); padding: 24px; }
+.roles { color: var(--gris); font-size: 14px; margin: -8px 0 16px; }

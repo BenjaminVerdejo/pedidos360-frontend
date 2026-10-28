@@ -1,0 +1,45 @@
+.barra {
+  background: var(--azul);
+  color: white;
+  padding: 0 32px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+.logo { font-size: 22px; font-weight: 700; margin: 0; }
+.logo span { color: #93c5fd; }
+
+nav { display: flex; gap: 8px; }
+nav a {
+  color: #dbeafe;
+  text-decoration: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+}
+nav a:hover { background: rgba(255, 255, 255, 0.12); }
+nav a.activo { background: rgba(255, 255, 255, 0.2); color: white; }
+
+.sesion { display: flex; align-items: center; gap: 12px; }
+.usuario {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #93c5fd;
+  color: var(--azul);
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.barra button { background: rgba(255, 255, 255, 0.15); }
+.barra button:hover { background: rgba(255, 255, 255, 0.3); }
+
+main { max-width: 1000px; margin: 0 auto; padding: 32px 24px; }
