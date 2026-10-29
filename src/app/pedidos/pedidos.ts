@@ -65,7 +65,9 @@ export class Pedidos implements OnInit {
     if (p.id == null) return;
     this.pedidosService.cambiarEstado(p.id, estado).subscribe({
       next: () => {
-        this.aviso.set(`Pedido #${p.id} cambió a ${estado}. Se envió la notificación por RabbitMQ.`);
+        this.aviso.set(estado === 'ENTREGADO'
+          ? `Pedido #${p.id} ENTREGADO. Notificación (topic) y comprobante de entrega (direct) enviados a RabbitMQ.`
+          : `Pedido #${p.id} cambió a ${estado}. Se envió la notificación por RabbitMQ.`);
         this.cargar();
       },
       error: (err) => this.error.set(`Error ${err.status} al cambiar el estado`)
