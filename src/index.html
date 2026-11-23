@@ -5,6 +5,11 @@
   <title>Pedidos360</title>
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Content-Security-Policy: solo se ejecutan scripts propios y solo se conecta a las APIs del
+       sistema y a Azure AD. Mitiga XSS y robo del token (OWASP A03/A05). En produccion la misma
+       politica se envia ademas como cabecera HTTP desde nginx (nginx.conf). -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' http://localhost:8081 http://localhost:8082 https://login.microsoftonline.com; frame-src https://login.microsoftonline.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta name="referrer" content="no-referrer">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
 </head>
 <body>

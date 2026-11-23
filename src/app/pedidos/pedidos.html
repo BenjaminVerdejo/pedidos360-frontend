@@ -14,10 +14,10 @@
 <div class="card">
   <h3>Nuevo pedido</h3>
   <div class="form-grid">
-    <input #nombre placeholder="Nombre cliente" />
-    <input #email placeholder="Email" />
-    <input #desc placeholder="Descripción" />
-    <input #total type="number" placeholder="Total" />
+    <input #nombre placeholder="Nombre cliente" required [attr.maxlength]="limites.nombre" autocomplete="name" />
+    <input #email type="email" placeholder="Email" required [attr.maxlength]="limites.email" autocomplete="email" />
+    <input #desc placeholder="Descripción" required [attr.maxlength]="limites.descripcion" />
+    <input #total type="number" placeholder="Total" required min="1" step="0.01" />
     <button (click)="crear(nombre.value, email.value, desc.value, total.value)">Crear pedido</button>
   </div>
 </div>
@@ -40,8 +40,12 @@
             <td>${{ p.total }}</td>
             <td><span [class]="'badge ' + (p.estado ?? '').toLowerCase()">{{ p.estado }}</span></td>
             <td class="acciones">
-              <button class="secundario" (click)="cambiarEstado(p, 'ENVIADO')">Enviado</button>
-              <button class="secundario" (click)="cambiarEstado(p, 'ENTREGADO')">Entregado</button>
+              @if (!esEstadoFinal(p.estado)) {
+                @if (p.estado !== 'ENVIADO') {
+                  <button class="secundario" (click)="cambiarEstado(p, 'ENVIADO')">Enviado</button>
+                }
+                <button class="secundario" (click)="cambiarEstado(p, 'ENTREGADO')">Entregado</button>
+              }
               @if (esAdmin) {
                 <button class="peligro" (click)="eliminar(p)">Eliminar</button>
               }

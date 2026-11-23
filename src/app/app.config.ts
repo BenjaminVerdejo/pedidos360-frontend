@@ -29,7 +29,9 @@ export function MSALInstanceFactory(): IPublicClientApplication {
       redirectUri: window.location.origin
     },
     cache: {
-      cacheLocation: BrowserCacheLocation.LocalStorage
+      // sessionStorage: el token se borra al cerrar la pestana y no queda persistido en el equipo
+      // (reduce el impacto de un XSS o de un equipo compartido; OWASP ASVS V3.2 / CWE-922)
+      cacheLocation: BrowserCacheLocation.SessionStorage
     }
   });
 }

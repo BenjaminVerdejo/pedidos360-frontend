@@ -1,0 +1,33 @@
+# Reglas SAST propias de Pedidos360 Frontend (Semgrep), ejecutadas en el pipeline de CI.
+rules:
+  - id: p360-token-en-localstorage
+    languages: [typescript]
+    severity: ERROR
+    message: >-
+      MSAL guarda los tokens en localStorage: persisten tras cerrar el navegador y cualquier
+      script inyectado (XSS) puede leerlos. Use BrowserCacheLocation.SessionStorage.
+    metadata:
+      cwe: "CWE-922: Insecure Storage of Sensitive Information"
+      owasp: "A02:2021 - Cryptographic Failures / A07:2021"
+      category: security
+    pattern: "cacheLocation: BrowserCacheLocation.LocalStorage"
+
+  - id: p360-sin-content-security-policy
+    languages: [generic]
+    severity: WARNING
+    paths:
+      include: ["index.html"]
+    message: >-
+      index.html no declara Content-Security-Policy. Sin CSP, un XSS puede cargar scripts externos
+      y exfiltrar el token. Declare una politica restrictiva.
+    metadata:
+      cwe: "CWE-1021 / CWE-79"
+      owasp: "A05:2021 - Security Misconfiguration"
+      category: security
+    patterns:
+      - pattern-regex: <head>
+      - pattern-not-inside: |
+          <head>
+          ...
+          Content-Security-Policy
+          ...
