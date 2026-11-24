@@ -65,7 +65,7 @@ jobs:
       - name: Reporte npm audit
         run: npm audit --json > npm-audit.json || true
       - name: Trivy (dependencias)
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0 (fijada por commit: protege ante tags modificados)
         with:
           scan-type: fs
           scanners: vuln
@@ -138,7 +138,7 @@ jobs:
       - name: Construir imagen
         run: docker build -t pedidos360/frontend:${{ github.sha }} .
       - name: Escanear imagen (Trivy)
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0 (fijada por commit: protege ante tags modificados)
         with:
           image-ref: pedidos360/frontend:${{ github.sha }}
           format: table
@@ -165,7 +165,7 @@ jobs:
             trivy-imagen.txt
             cabeceras.md
       - name: Quality gate imagen (CRITICAL con parche)
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0 (fijada por commit: protege ante tags modificados)
         with:
           image-ref: pedidos360/frontend:${{ github.sha }}
           severity: CRITICAL
