@@ -3,6 +3,7 @@ import { MsalService } from '@azure/msal-angular';
 import { API_SCOPE } from '../config';
 import { obtenerRoles } from '../auth/roles';
 import { Pedido, PedidosService } from '../services/pedidos.service';
+import { LIMITES, esEstadoFinal, mensajeDeError, validarPedido } from './validacion';
 
 @Component({
   selector: 'app-pedidos',
@@ -18,6 +19,8 @@ export class Pedidos implements OnInit {
   readonly aviso = signal('');
   readonly roles = signal<string[]>([]);
   readonly scopes = signal<string[]>([]);
+  readonly limites = LIMITES;
+  readonly esEstadoFinal = esEstadoFinal;
 
   get esAdmin(): boolean {
     return this.roles().includes('Admin');
@@ -44,25 +47,37 @@ export class Pedidos implements OnInit {
   cargar() {
     this.pedidosService.listar().subscribe({
       next: (data) => { this.pedidos.set(data); this.error.set(''); },
-      error: (err) => this.error.set(`Error ${err.status} al cargar los pedidos`)
+      error: (err) => this.error.set(mensajeDeError(err, 'cargar los pedidos'))
     });
   }
 
   crear(nombre: string, email: string, descripcion: string, total: string) {
+    // validacion en el cliente: si hay errores no se llama al backend
+    const errores = validarPedido({ nombre, email, descripcion, total });
+    if (errores.length) {
+      this.aviso.set('');
+      this.error.set(errores.join('. '));
+      return;
+    }
+    this.error.set('');
     this.pedidosService
-      .crear({ cliente: { nombre, email }, descripcion, total: Number(total) })
+      .crear({
+        cliente: { nombre: nombre.trim(), email: email.trim() },
+        descripcion: descripcion.trim(),
+        total: Number(total)
+      })
       .subscribe({
         next: (p) => {
           // el backend publica el evento en RabbitMQ: notificacion + ticket se procesan en segundo plano
           this.aviso.set(`Pedido #${p.id} creado. Notificación y ticket enviados a RabbitMQ para procesarse en segundo plano.`);
           this.cargar();
         },
-        error: (err) => this.error.set(`Error ${err.status} al crear el pedido`)
+        error: (err) => this.error.set(mensajeDeError(err, 'crear el pedido'))
       });
   }
 
   cambiarEstado(p: Pedido, estado: string) {
-    if (p.id == null) return;
+    if (p.id == null || esEstadoFinal(p.estado)) return;
     this.pedidosService.cambiarEstado(p.id, estado).subscribe({
       next: () => {
         this.aviso.set(estado === 'ENTREGADO'
@@ -70,7 +85,7 @@ export class Pedidos implements OnInit {
           : `Pedido #${p.id} cambió a ${estado}. Se envió la notificación por RabbitMQ.`);
         this.cargar();
       },
-      error: (err) => this.error.set(`Error ${err.status} al cambiar el estado`)
+      error: (err) => this.error.set(mensajeDeError(err, 'cambiar el estado'))
     });
   }
 
@@ -78,7 +93,7 @@ export class Pedidos implements OnInit {
     if (p.id == null) return;
     this.pedidosService.eliminar(p.id).subscribe({
       next: () => this.cargar(),
-      error: (err) => this.error.set(err.status === 403 ? 'No tienes permiso (solo Admin)' : `Error ${err.status}`)
+      error: (err) => this.error.set(err.status === 403 ? 'No tienes permiso (solo Admin)' : mensajeDeError(err, 'eliminar'))
     });
   }
 }

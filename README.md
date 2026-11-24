@@ -1,5 +1,8 @@
 # Pedidos360 - Frontend
 
+[![CI Seguridad y Calidad](https://github.com/BenjaminVerdejo/pedidos360-frontend/actions/workflows/ci-seguridad.yml/badge.svg)](https://github.com/BenjaminVerdejo/pedidos360-frontend/actions/workflows/ci-seguridad.yml)
+[![CodeQL](https://github.com/BenjaminVerdejo/pedidos360-frontend/actions/workflows/codeql.yml/badge.svg)](https://github.com/BenjaminVerdejo/pedidos360-frontend/actions/workflows/codeql.yml)
+
 Frontend Angular 22 (componentes standalone + signals) de Pedidos360.
 Inicia sesión con **Azure AD (IDaaS)** usando MSAL y envía el **JWT** en cada llamada al backend.
 
@@ -39,5 +42,23 @@ src/app/
 npm install
 npm start          # http://localhost:4200  (requiere los microservicios del backend corriendo)
 npm test           # pruebas unitarias (Vitest)
+npm run test:ci    # pruebas + reporte de cobertura (coverage/)
+npm run audit:seguridad   # falla si hay dependencias con vulnerabilidades HIGH/CRITICAL
 npm run build      # compilación de producción en dist/
+docker build -t pedidos360/frontend . && docker run -p 8080:8080 pedidos360/frontend   # nginx sin root + cabeceras de seguridad
 ```
+
+## Seguridad y calidad (EP5)
+
+| Control | Implementación |
+|---|---|
+| Token fuera de almacenamiento persistente | MSAL con `sessionStorage` (antes `localStorage`) |
+| Content-Security-Policy | `index.html` (meta) y cabecera HTTP en `nginx.conf`; sin scripts *inline* (`inlineCritical: false`) |
+| Cabeceras HTTP | `nginx.conf`: CSP, X-Frame-Options, nosniff, Referrer-Policy, HSTS, `server_tokens off` |
+| Validación de entrada | `pedidos/validacion.ts` con los mismos límites que el backend; mensajes de error sin detalles técnicos |
+| Reglas de negocio en la UI | Pedidos ENTREGADO/CANCELADO no muestran acciones de cambio de estado |
+| Dependencias | `npm audit` sin vulnerabilidades + Dependabot semanal |
+
+Pipeline [`ci-seguridad.yml`](.github/workflows/ci-seguridad.yml): pruebas + cobertura (Vitest), SCA (npm audit + Trivy),
+SAST (Semgrep con reglas propias en [`.semgrep/`](.semgrep) + CodeQL), secretos (Gitleaks), Hadolint, Trivy imagen,
+verificación de cabeceras ([`scripts/verificar-cabeceras.sh`](scripts/verificar-cabeceras.sh)) y OWASP ZAP.

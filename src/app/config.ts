@@ -5,6 +5,8 @@ export const API_URL = 'http://localhost:8081';
 // Microservicio administrador de RabbitMQ (rabbit-admin-service)
 export const ADMIN_API_URL = 'http://localhost:8082';
 
-export const CLIENT_ID = '82adc866-3948-44f8-993d-5658734ad794';
+// CLIENT_ID y TENANT_ID son identificadores PUBLICOS de Azure AD (no son secretos): una SPA no usa
+// client secret, la seguridad se basa en PKCE + redirect URI registrada. Falso positivo SAST revisado.
+export const CLIENT_ID = '82adc866-3948-44f8-993d-5658734ad794'; // nosemgrep: generic-api-key
 export const TENANT_ID = '015cad58-1396-4898-9f0a-4cb1e1191c38';
 export const API_SCOPE = `api://${CLIENT_ID}/Pedidos.Access`;
