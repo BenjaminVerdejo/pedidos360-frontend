@@ -1,0 +1,64 @@
+<h2>Analítica en vivo</h2>
+<p class="roles">
+  Datos calculados por <strong>analitica-service</strong> a partir de los eventos de Kafka
+  (tópicos <code>pedidos-creados</code> y <code>pedidos-estados</code>, consumer group <code>analitica</code>).
+  Se actualiza cada 3 segundos.
+</p>
+
+@if (error()) {
+  <div class="alerta error">{{ error() }}</div>
+}
+
+@if (resumen(); as r) {
+  <div class="kpis">
+    <div class="card kpi"><span>Pedidos creados</span><strong>{{ r.pedidosCreados }}</strong></div>
+    <div class="card kpi"><span>Entregados</span><strong>{{ r.pedidosEntregados }}</strong></div>
+    <div class="card kpi"><span>Ventas totales</span><strong>{{ r.ventasTotales | currency: 'CLP' : 'symbol-narrow' : '1.0-0' }}</strong></div>
+    <div class="card kpi"><span>Ticket promedio</span><strong>{{ r.ticketPromedio | currency: 'CLP' : 'symbol-narrow' : '1.0-0' }}</strong></div>
+  </div>
+
+  <div class="card">
+    <h3>Pedidos por estado</h3>
+    @for (e of estados; track e) {
+      <div class="fila-estado">
+        <span class="etiqueta">{{ e }}</span>
+        <div class="barra-fondo"><div class="barra" [class]="'barra ' + e.toLowerCase()" [style.width.%]="porcentaje(e)"></div></div>
+        <span class="valor">{{ r.pedidosPorEstado[e] ?? 0 }}</span>
+      </div>
+    }
+    <p class="nota">
+      Cambios de estado procesados: {{ r.cambiosDeEstado }} · Ventas entregadas:
+      {{ r.ventasEntregadas | currency: 'CLP' : 'symbol-narrow' : '1.0-0' }} · Duplicados descartados: {{ r.eventosDuplicadosDescartados }}
+    </p>
+  </div>
+
+  <div class="card">
+    <h3>Últimos eventos consumidos</h3>
+    @if (r.ultimosEventos.length === 0) {
+      <p class="nota">Aún no hay eventos. Crea un pedido y aparecerá aquí en segundos.</p>
+    } @else {
+      <div class="tabla-wrap">
+        <table>
+          <thead>
+            <tr><th>Evento</th><th>Pedido</th><th>Detalle</th><th>Tópico</th><th>Partición</th><th>Offset</th></tr>
+          </thead>
+          <tbody>
+            @for (ev of r.ultimosEventos; track ev.topico + ev.particion + ev.offset) {
+              <tr>
+                <td>{{ ev.tipo }}</td>
+                <td>#{{ ev.pedidoId }}</td>
+                <td>{{ ev.detalle }}</td>
+                <td><code>{{ ev.topico }}</code></td>
+                <td>{{ ev.particion }}</td>
+                <td>{{ ev.offset }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+    <p class="nota">Última actualización: {{ r.actualizadoEn | date: 'HH:mm:ss' }}</p>
+  </div>
+} @else if (!error()) {
+  <p class="nota">Cargando analítica…</p>
+}

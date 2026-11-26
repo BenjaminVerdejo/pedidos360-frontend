@@ -5,9 +5,11 @@
     <a routerLink="/" routerLinkActive="activo" [routerLinkActiveOptions]="{ exact: true }">Inicio</a>
     @if (loginDisplay()) {
       <a routerLink="/pedidos" routerLinkActive="activo">Pedidos</a>
+      <a routerLink="/analitica" routerLinkActive="activo">Analítica en vivo</a>
     }
     @if (admin()) {
       <a routerLink="/admin-rabbitmq" routerLinkActive="activo">RabbitMQ</a>
+      <a routerLink="/admin-kafka" routerLinkActive="activo">Kafka</a>
     }
   </nav>
 

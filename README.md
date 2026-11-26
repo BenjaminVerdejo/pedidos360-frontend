@@ -62,3 +62,17 @@ docker build -t pedidos360/frontend . && docker run -p 8080:8080 pedidos360/fron
 Pipeline [`ci-seguridad.yml`](.github/workflows/ci-seguridad.yml): pruebas + cobertura (Vitest), SCA (npm audit + Trivy),
 SAST (Semgrep con reglas propias en [`.semgrep/`](.semgrep) + CodeQL), secretos (Gitleaks), Hadolint, Trivy imagen,
 verificación de cabeceras ([`scripts/verificar-cabeceras.sh`](scripts/verificar-cabeceras.sh)) y OWASP ZAP.
+
+## Kafka (EP5 DSY1107)
+
+| Vista | Ruta | Microservicio | Acceso |
+|---|---|---|---|
+| Analítica en vivo | `/analitica` | analitica-service (8083) | usuario con scope `Pedidos.Access` |
+| Administración de Kafka | `/admin-kafka` | kafka-admin-service (8084) | rol `Admin` |
+
+- **Analítica en vivo** consulta cada 3 s las métricas que `analitica-service` calcula consumiendo los tópicos
+  `pedidos-creados` y `pedidos-estados`. Al crear o entregar un pedido, los números cambian en segundos.
+- **Administración de Kafka** permite listar tópicos (particiones, réplicas, ISR, retención), crear tópicos,
+  modificar su configuración (retención, cleanup policy), eliminar tópicos no protegidos y ver los consumer
+  groups con su lag por partición.
+- El JWT se envía también a los puertos 8083 y 8084 (`protectedResourceMap`) y la CSP los permite en `connect-src`.
