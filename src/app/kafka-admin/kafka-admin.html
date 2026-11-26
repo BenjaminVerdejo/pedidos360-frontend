@@ -1,0 +1,165 @@
+<h2>Administración de Kafka</h2>
+<p class="roles">
+  Gestiona tópicos, configuraciones y consumer groups a través de <strong>kafka-admin-service</strong>.
+  Los tópicos del sistema (<code>pedidos-creados</code>, <code>pedidos-estados</code> y sus DLT) no se pueden eliminar.
+  Para ver mensajes y métricas detalladas usa también Kafka UI (http://localhost:8090).
+</p>
+
+@if (registros().length) {
+  <div class="card registro">
+    <ul>
+      @for (r of registros(); track $index) {
+        <li [class]="r.ok ? 'ok-txt' : 'error-txt'"><span class="hora">{{ r.hora }}</span> {{ r.ok ? '✔' : '✖' }} {{ r.texto }}</li>
+      }
+    </ul>
+  </div>
+}
+
+<div class="card">
+  <div class="cabecera">
+    <h3>Tópicos</h3>
+    <button class="secundario" (click)="refrescar()">Actualizar</button>
+  </div>
+  <div class="tabla-wrap">
+    <table>
+      <thead>
+        <tr><th>Tópico</th><th>Particiones</th><th>Réplicas</th><th>Retención</th><th></th></tr>
+      </thead>
+      <tbody>
+        @for (t of topicos(); track t.nombre) {
+          <tr>
+            <td><code>{{ t.nombre }}</code> @if (t.protegido) { <span class="etiqueta">sistema</span> }</td>
+            <td>{{ t.particiones }}</td>
+            <td>{{ t.replicas }}</td>
+            <td>{{ retencion(t) }}</td>
+            <td class="acciones">
+              <button class="secundario" (click)="verTopico(t.nombre)">Detalle</button>
+              @if (!t.protegido) {
+                <button class="peligro" (click)="eliminar(t)">Eliminar</button>
+              }
+            </td>
+          </tr>
+        } @empty {
+          <tr><td colspan="5">Sin tópicos (¿está levantado el cluster Kafka?)</td></tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
+
+@if (detalle(); as d) {
+  <div class="card">
+    <h3>Detalle de <code>{{ d.nombre }}</code></h3>
+    <div class="config">
+      @for (c of d.configuracion | keyvalue; track c.key) {
+        <span><strong>{{ c.key }}</strong>: {{ c.value }}</span>
+      }
+    </div>
+    <table>
+      <thead><tr><th>Partición</th><th>Líder</th><th>Réplicas</th><th>ISR (sincronizadas)</th></tr></thead>
+      <tbody>
+        @for (p of d.detalleParticiones; track p.particion) {
+          <tr>
+            <td>{{ p.particion }}</td>
+            <td>broker {{ p.lider ?? 'sin líder' }}</td>
+            <td>{{ p.replicas.join(', ') }}</td>
+            <td [class.alerta-isr]="p.isr.length < p.replicas.length">{{ p.isr.join(', ') }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}
+
+<div class="grid">
+  <div class="card">
+    <h3>Nuevo tópico</h3>
+    <form [formGroup]="crearForm" (ngSubmit)="crearTopico()" class="form-col">
+      <label>Nombre *
+        <input formControlName="nombre" placeholder="reportes-diarios" />
+        <small class="campo-error">{{ error('nombre') }}</small>
+      </label>
+      <label>Particiones *
+        <input type="number" formControlName="particiones" />
+        <small class="campo-error">{{ error('particiones') }}</small>
+      </label>
+      <label>Réplicas *
+        <input type="number" formControlName="replicas" />
+        <small class="campo-error">{{ error('replicas') }}</small>
+      </label>
+      <label>Retención (horas)
+        <input type="number" formControlName="retencionHoras" />
+      </label>
+      <label>Cleanup policy
+        <select formControlName="cleanupPolicy">
+          @for (p of politicas; track p) { <option [value]="p">{{ p }}</option> }
+        </select>
+      </label>
+      <label>min.insync.replicas
+        <input type="number" formControlName="minInsyncReplicas" />
+      </label>
+      <button type="submit" [disabled]="cargando()">Crear tópico</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <h3>Modificar configuración</h3>
+    <form [formGroup]="configForm" (ngSubmit)="actualizarConfiguracion()" class="form-col">
+      <label>Tópico *
+        <input formControlName="nombre" placeholder="pedidos-creados" />
+        <small class="campo-error">{{ error('nombre', 'config') }}</small>
+      </label>
+      <label>Nueva retención (horas)
+        <input type="number" formControlName="retencionHoras" placeholder="48" />
+      </label>
+      <label>Nueva cleanup policy
+        <select formControlName="cleanupPolicy">
+          <option [ngValue]="null">(sin cambio)</option>
+          @for (p of politicas; track p) { <option [ngValue]="p">{{ p }}</option> }
+        </select>
+      </label>
+      <button type="submit" [disabled]="cargando()">Guardar cambios</button>
+    </form>
+  </div>
+</div>
+
+<div class="card">
+  <h3>Consumer groups</h3>
+  <div class="tabla-wrap">
+    <table>
+      <thead><tr><th>Grupo</th><th>Estado</th><th>Consumidores</th><th>Particiones asignadas</th><th></th></tr></thead>
+      <tbody>
+        @for (g of grupos(); track g.grupo) {
+          <tr>
+            <td><code>{{ g.grupo }}</code></td>
+            <td>{{ g.estado }}</td>
+            <td>{{ g.miembros.length }}</td>
+            <td>
+              @for (m of g.miembros; track m.consumidorId) {
+                <div class="miembro">{{ m.clientId }}: {{ m.particiones.join(', ') }}</div>
+              }
+            </td>
+            <td><button class="secundario" (click)="verLag(g.grupo)">Ver lag</button></td>
+          </tr>
+        } @empty {
+          <tr><td colspan="5">Sin consumer groups</td></tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  @if (lag(); as l) {
+    <h3 class="sub">Lag de <code>{{ l.grupo }}</code>: {{ l.lagTotal }} mensajes pendientes</h3>
+    <table>
+      <thead><tr><th>Tópico</th><th>Partición</th><th>Offset consumido</th><th>Offset final</th><th>Lag</th></tr></thead>
+      <tbody>
+        @for (p of l.particiones; track p.topico + p.particion) {
+          <tr [class.con-lag]="p.lag > 0">
+            <td><code>{{ p.topico }}</code></td><td>{{ p.particion }}</td>
+            <td>{{ p.offsetConsumido }}</td><td>{{ p.offsetFinal }}</td><td>{{ p.lag }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>

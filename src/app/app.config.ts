@@ -19,7 +19,7 @@ import {
   BrowserCacheLocation
 } from '@azure/msal-browser';
 import { routes } from './app.routes';
-import { ADMIN_API_URL, API_SCOPE, API_URL, CLIENT_ID, TENANT_ID } from './config';
+import { ADMIN_API_URL, ANALITICA_API_URL, API_SCOPE, API_URL, CLIENT_ID, KAFKA_ADMIN_API_URL, TENANT_ID } from './config';
 
 export function MSALInstanceFactory(): IPublicClientApplication {
   return new PublicClientApplication({
@@ -44,6 +44,9 @@ export function MSALInterceptorConfigFactory(): MsalInterceptorConfiguration {
   protectedResourceMap.set(`${API_URL}/api/*`, [API_SCOPE]);
   // el administrador de RabbitMQ tambien recibe el JWT
   protectedResourceMap.set(`${ADMIN_API_URL}/api/*`, [API_SCOPE]);
+  // microservicios Kafka: analitica en tiempo real y administrador de topicos
+  protectedResourceMap.set(`${ANALITICA_API_URL}/api/*`, [API_SCOPE]);
+  protectedResourceMap.set(`${KAFKA_ADMIN_API_URL}/api/*`, [API_SCOPE]);
 
   return {
     interactionType: InteractionType.Redirect,

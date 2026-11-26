@@ -5,6 +5,12 @@ export const API_URL = 'http://localhost:8081';
 // Microservicio administrador de RabbitMQ (rabbit-admin-service)
 export const ADMIN_API_URL = 'http://localhost:8082';
 
+// Consumidor Kafka con las metricas en tiempo real (analitica-service)
+export const ANALITICA_API_URL = 'http://localhost:8083';
+
+// Microservicio administrador de Kafka: topicos y consumer groups (kafka-admin-service)
+export const KAFKA_ADMIN_API_URL = 'http://localhost:8084';
+
 // CLIENT_ID y TENANT_ID son identificadores PUBLICOS de Azure AD (no son secretos): una SPA no usa
 // client secret, la seguridad se basa en PKCE + redirect URI registrada. Falso positivo SAST revisado.
 export const CLIENT_ID = '82adc866-3948-44f8-993d-5658734ad794'; // nosemgrep: generic-api-key

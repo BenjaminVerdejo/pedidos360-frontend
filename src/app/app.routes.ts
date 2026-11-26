@@ -14,5 +14,17 @@ export const routes: Routes = [
     loadComponent: () => import('./rabbit-admin/rabbit-admin').then((m) => m.RabbitAdmin),
     canActivate: [MsalGuard, adminGuard]
   },
+  // analitica en tiempo real alimentada por Kafka (consumer group "analitica")
+  {
+    path: 'analitica',
+    loadComponent: () => import('./analitica/analitica').then((m) => m.Analitica),
+    canActivate: [MsalGuard]
+  },
+  // solo Admin: administracion de topicos y consumer groups de Kafka
+  {
+    path: 'admin-kafka',
+    loadComponent: () => import('./kafka-admin/kafka-admin').then((m) => m.KafkaAdmin),
+    canActivate: [MsalGuard, adminGuard]
+  },
   { path: '**', redirectTo: '' }
 ];
